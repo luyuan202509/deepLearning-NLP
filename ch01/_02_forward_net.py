@@ -1,5 +1,6 @@
 import numpy as np
 from collections import OrderedDict
+from common.optimizer import SGD
 
 
 class Sigmoid:
@@ -10,14 +11,35 @@ class Sigmoid:
         self.params = []
     def forward(self,x):
         return 1 / (1 + np.exp(-x)) 
+    
+    def backward(self,dout):
+        """"
+        sigmoid 层的反向传播 
+        dy/dx = y * (1 - y)
+        """
+        return dout * (1 - self.out) * self.out
+
 
 class Affine:
     def __init__(self, W, b):
         self.params = [W, b]
+        self.grads = [np.zeros_like(W), np.zeros_like(b)]
+        self.x = None
     def forward(self, x):
         W,b = self.params
         out = np.dot(x, W) + b
+        self.x = x
         return out
+    
+    def backward(self,dout):
+        W,b = self.params
+        dx = np.dot(dout, W.T)
+        dW = np.dot(self.x.T, dout)
+        db = np.sum(dout, axis=0)
+        self.grads[0][...] = dW
+        self.grads[1][...] = db
+        return dx
+
 
 class TwoLayerNet:
     def __init__(self, input_size, hidden_size, output_size):
@@ -46,10 +68,42 @@ class TwoLayerNet:
             x = layer.forward(x)
         return x
 
-if __name__ == "__main__":
+
+
+class MatMul:
+    """"矩阵乘法层"""
+    def __init__(self, W):
+        self.params = [W]
+        self.grads = [np.zeros_like(W)]
+        self.x = None
+    def forward(self,x):
+        W, = self.params
+        out = np.dot(x, W)
+        self.x = x
+        return out
+    
+    def backward(self,dout):
+        W, = self.params
+        dx  = np.dot(dout, W.T)
+        dW  = np.dot(self.x.T, dout)
+        self.grads[0][...] = dW
+        return dx 
+
+def main1():
     x = np.random.rand(10,2)
     print("输入数据：",x)
     model = TwoLayerNet(2,4,3)
     s = model.predict(x)
     print("输出推理结果：",s)
+
+def main2():
+    model = TwoLayerNet(2,4,3)
+    x = np.random.rand(10,2)
+    t = np.random.rand(10,3)
+    optimizer = SGD()
+
+
+if __name__ == "__main__":
+    main1()
+    main2()
    
