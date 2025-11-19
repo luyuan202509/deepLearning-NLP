@@ -1,3 +1,10 @@
+import sys, os
+
+# 将项目根目录加入 Python 搜索路径（当前文件所在目录的上一级目录）
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if ROOT_DIR not in sys.path:
+    sys.path.append(ROOT_DIR)
+
 import numpy as np
 from collections import OrderedDict
 from common.optimizer import SGD
@@ -97,13 +104,20 @@ def main1():
     print("输出推理结果：",s)
 
 def main2():
+    """"训练模型，这里模型中还没有损失的计算，所以无法训练"""
     model = TwoLayerNet(2,4,3)
     x = np.random.rand(10,2)
     t = np.random.rand(10,3)
     optimizer = SGD()
+    for i in range(10000):
+        y = model.predict(x)
+        loss = model.loss(y,t)
+        model.backward()
+        optimizer.update(model.params, model.grads)
+        print("loss:",loss)
 
 
 if __name__ == "__main__":
-    main1()
+    #main1()
     main2()
    
