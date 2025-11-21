@@ -10,15 +10,16 @@ from common.util import clip_grads
 
 class Trainer:
     def __init__(self, model, optimizer):
-        self.model = model
-        self.optimizer = optimizer
-        self.loss_list = []
-        self.eval_interval = None
-        self.current_epoch = 0
+        self.model = model         # 模型
+        self.optimizer = optimizer # 优化器
+        self.loss_list = []        # 损失列表，用于存储每个epoch的损失值
+        self.eval_interval = None  # 评估间隔，用于指定每隔多少次迭代进行一次评估
+        self.current_epoch = 0     # 当前epoch，用于记录当前训练的epoch数
 
     def fit(self, x, t, max_epoch=10, batch_size=32, max_grad=None, eval_interval=20):
         data_size = len(x)
         max_iters = data_size // batch_size
+        print(f"---max_iters: {max_iters}")
         self.eval_interval = eval_interval
         model, optimizer = self.model, self.optimizer
         total_loss = 0
@@ -32,6 +33,7 @@ class Trainer:
             t = t[idx]
 
             for iters in range(max_iters):
+                print(f"---iters: {iters}")
                 batch_x = x[iters*batch_size:(iters+1)*batch_size]
                 batch_t = t[iters*batch_size:(iters+1)*batch_size]
 
@@ -53,9 +55,9 @@ class Trainer:
                           % (self.current_epoch + 1, iters + 1, max_iters, elapsed_time, avg_loss))
                     self.loss_list.append(float(avg_loss))
                     total_loss, loss_count = 0, 0
-
+            
             self.current_epoch += 1
-
+            print(f"---current_epoch: {self.current_epoch}")
     def plot(self, ylim=None):
         x = numpy.arange(len(self.loss_list))
         if ylim is not None:
